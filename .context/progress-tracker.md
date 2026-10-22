@@ -2,28 +2,30 @@
 
 ## Current Phase
 
-- Phase 1: Context Setup & Data Contracts
+- Phase 2: Control Deck & KPI Dashboard
 
 ## Current Goal
 
-- Finalize `.context/` specification files and verify core TypeScript contracts (`src/types/economics.ts`) and pure calculation engine (`src/lib/calculations.ts`).
+- Construct main Command Deck layout (`src/app/page.tsx`), sidebar slider panel (`src/components/controls/ControlDeck.tsx`), and glowing KPI metric cards (`src/components/ui/KPICard.tsx`).
 
 ## Completed
 
-- [x] Defined root directory structure and spec-driven context files.
+- [x] Defined root directory structure and spec-driven `.context/` files.
 - [x] Created `src/types/economics.ts` with strict TypeScript data interfaces.
 - [x] Implemented pure math engine in `src/lib/calculations.ts` (DCF, Hoskold, Morkill, IBM Royalties, AISC).
+- [x] Implemented background Monte Carlo Web Worker thread in `src/workers/monteCarlo.worker.ts`.
+- [x] Created GATE sample problem presets and Indian mine case studies in `src/lib/presets.ts`.
 
 ## In Progress
 
-- [ ] Creating background Monte Carlo Web Worker thread in `src/workers/monteCarlo.worker.ts`.
-- [ ] Creating default GATE problem presets and Indian mine case studies in `src/lib/presets.ts`.
+- [ ] Building Command Deck workspace layout in `src/app/page.tsx`.
+- [ ] Building interactive dynamic sliders in `src/components/controls/ControlDeck.tsx`.
+- [ ] Building glowing KPI summary cards in `src/components/ui/KPICard.tsx`.
 
 ## Next Up
 
-- Construct Main Workspace Command Deck layout (`src/app/page.tsx`).
-- Build Control Deck slider panel and KPI cards.
-- Integrate Recharts analytics suite.
+- Build interactive multi-year financial ledger table (`src/components/ledger/FinancialLedgerTable.tsx`).
+- Integrate Recharts analytics suite (Cash Flow Waterfall, Tornado Sensitivity, Monte Carlo Histogram, Sinking Fund Accumulation).
 
 ## Open Questions
 
