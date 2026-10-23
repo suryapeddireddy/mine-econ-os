@@ -11,7 +11,7 @@ interface ControlDeckProps {
 
 const sections = [
   { title: 'Geology & Production', icon: Gem, fields: [
-    { key: 'totalTonnage', label: 'Ore reserve', min: 1, max: 200, step: 1, unit: 'Mt' },
+    { key: 'totalTonnage', label: 'Ore reserve', min: 1, max: 200, step: 1, unit: 'Mt', description: 'In-situ reserve before mining recovery.' },
     { key: 'annualMiningCapacity', label: 'Annual capacity', min: 0.5, max: 20, step: 0.5, unit: 'Mt/y' },
     { key: 'headGrade', label: 'Head grade', min: 0.1, max: 100, step: 0.1, unit: '%' },
   ] },
@@ -21,9 +21,9 @@ const sections = [
     { key: 'processingOpexPerTon', label: 'Processing cost', min: 0, max: 100, step: 0.5, unit: '$/t' },
   ] },
   { title: 'Market & IBM Royalties', icon: TrendingUp, fields: [
-    { key: 'commodityPrice', label: 'Commodity price', min: 0, max: 15000, step: 10, unit: '$/t' },
+    { key: 'commodityPrice', label: 'Commodity price', min: 0, max: 15000, step: 10, unit: '$/t', description: 'Sale price per tonne of final metal.' },
     { key: 'discountRate', label: 'Discount rate', min: 0, max: 30, step: 0.5, unit: '%' },
-    { key: 'royaltyRate', label: 'IBM royalty rate', min: 0, max: 30, step: 0.1, unit: '%' },
+    { key: 'royaltyRate', label: 'IBM royalty rate', min: 0, max: 30, step: 0.1, unit: '%', description: 'Applied to recovered feed at the preset IBM benchmark price.' },
   ] },
   { title: 'Hoskold Parameters', icon: Coins, fields: [
     { key: 'speculativeRate', label: 'Speculative rate · r₁', min: 0, max: 30, step: 0.5, unit: '%' },

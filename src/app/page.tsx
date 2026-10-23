@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Activity, ArrowUpRight, BookOpen, Clock3, Coins, Layers3, Pickaxe, TrendingUp, Wallet } from 'lucide-react';
 import ControlDeck from '@/components/controls/ControlDeck';
 import KPICard from '@/components/ui/KPICard';
@@ -24,13 +25,14 @@ export default function Dashboard() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#command-deck">Skip to Command Deck</a>
       <header className="topbar">
-        <a className="brand" href="/" aria-label="MineEcon-OS home"><span className="brand-icon"><Pickaxe size={23} /></span><span>MineEcon<span className="brand-os">-OS</span><small>MINERAL ECONOMICS WORKSPACE</small></span></a>
+        <Link className="brand" href="/" aria-label="MineEcon-OS home"><span className="brand-icon"><Pickaxe size={23} /></span><span>MineEcon<span className="brand-os">-OS</span><small>MINERAL ECONOMICS WORKSPACE</small></span></Link>
         <nav aria-label="Main navigation"><a href="#command-deck" className="nav-active"><Activity size={15} />Command Deck</a><a href="#cash-flow"><Layers3 size={15} />Cash Flow Ledger</a></nav>
         <span className="system-status"><span />MODEL ONLINE</span>
       </header>
 
-      <main id="command-deck" className="workspace">
+      <main id="command-deck" className="workspace" tabIndex={-1}>
         <div className="workspace-title"><div><p className="eyebrow">PROJECT VALUATION / WORKSPACE 01</p><h1>Command Deck<span>.</span></h1><p className="intro">Explore the economics beneath the surface.</p></div><div className="workspace-tag"><Activity size={15} />Deterministic analysis</div></div>
 
         <section className="preset-bar" aria-label="Benchmark scenarios"><span className="eyebrow">LOAD BENCHMARK</span><div className="preset-options">{DEFAULT_PRESETS.map(preset => <button key={preset.id} type="button" aria-pressed={presetId === preset.id} title={preset.description} className={`preset-button ${presetId === preset.id ? 'selected' : ''}`} onClick={() => { setParams({ ...preset.params }); setPresetId(preset.id); }}><span className="preset-category">{preset.category === 'GATE_SAMPLE' ? 'GATE' : 'INDIA'}</span>{preset.title}<ArrowUpRight size={14} aria-hidden="true" /></button>)}</div></section>

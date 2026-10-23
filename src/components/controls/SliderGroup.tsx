@@ -19,7 +19,7 @@ export default function SliderGroup({ label, value, min, max, step, unit, onChan
     <div className="slider-group">
       <div className="slider-label">
         <label htmlFor={id}>{label}</label>
-        <span className="value-badge">{value.toLocaleString('en-US', { maximumFractionDigits: 3 })} <span>{unit}</span></span>
+        <output htmlFor={id} className="value-badge">{value.toLocaleString('en-US', { maximumFractionDigits: 3 })} <span>{unit}</span></output>
       </div>
       <input id={id} type="range" aria-label={label} aria-describedby={description ? `${id}-description` : undefined}
         aria-valuetext={`${value} ${unit}`} min={min} max={max} step={step} value={value}
