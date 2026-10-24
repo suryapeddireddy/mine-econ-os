@@ -1,13 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Activity, ArrowUpRight, BookOpen, Clock3, Coins, Layers3, Pickaxe, TrendingUp, Wallet } from 'lucide-react';
+import CashFlowChart from '@/components/analytics/CashFlowChart';
+import MonteCarloChart from '@/components/analytics/MonteCarloChart';
+import SensitivityChart from '@/components/analytics/SensitivityChart';
 import ControlDeck from '@/components/controls/ControlDeck';
 import KPICard from '@/components/ui/KPICard';
 import { calculateMineFinancials } from '@/lib/calculations';
 import { DEFAULT_PRESETS } from '@/lib/presets';
-import type { MineParameters } from '@/types/economics';
+import type { MineParameters, MonteCarloResult } from '@/types/economics';
 
 const decimal = (value: number, digits = 1) => value.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const millions = (value: number) => decimal(value / 1_000_000, 2);
@@ -15,12 +18,68 @@ const millions = (value: number) => decimal(value / 1_000_000, 2);
 export default function Dashboard() {
   const [params, setParams] = useState<MineParameters>({ ...DEFAULT_PRESETS[0].params });
   const [presetId, setPresetId] = useState<string | null>(DEFAULT_PRESETS[0].id);
+  const [simulation, setSimulation] = useState<{ params: MineParameters; result: MonteCarloResult } | null>(null);
+  const [simulationFailure, setSimulationFailure] = useState<{ params: MineParameters; message: string } | null>(null);
+  const [runningParams, setRunningParams] = useState<MineParameters | null>(null);
+  const workerRef = useRef<Worker | null>(null);
   const results = useMemo(() => calculateMineFinancials(params), [params]);
   const life = params.totalTonnage / params.annualMiningCapacity;
+  const monteCarloResult = simulation?.params === params ? simulation.result : null;
+  const simulationError = simulationFailure?.params === params ? simulationFailure.message : null;
+  const isSimulating = runningParams === params;
+
+  useEffect(() => {
+    return () => {
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, [params]);
 
   function updateParams(updated: MineParameters) {
     setParams(updated);
     setPresetId(null);
+  }
+
+  function runMonteCarlo() {
+    workerRef.current?.terminate();
+    setSimulation(null);
+    setSimulationFailure(null);
+    setRunningParams(params);
+
+    try {
+      const worker = new Worker(new URL('../workers/monteCarlo.worker.ts', import.meta.url));
+      workerRef.current = worker;
+      worker.onmessage = (event: MessageEvent<MonteCarloResult>) => {
+        if (workerRef.current !== worker) return;
+        setSimulation({ params, result: event.data });
+        setRunningParams(null);
+        worker.terminate();
+        workerRef.current = null;
+      };
+      worker.onerror = event => {
+        if (workerRef.current !== worker) return;
+        setSimulationFailure({ params, message: event.message || 'The Monte Carlo simulation failed.' });
+        setRunningParams(null);
+        worker.terminate();
+        workerRef.current = null;
+      };
+      worker.onmessageerror = () => {
+        if (workerRef.current !== worker) return;
+        setSimulationFailure({ params, message: 'The Monte Carlo simulation returned an unreadable result.' });
+        setRunningParams(null);
+        worker.terminate();
+        workerRef.current = null;
+      };
+      worker.postMessage({ params, iterations: 10_000 });
+    } catch (error) {
+      workerRef.current?.terminate();
+      setSimulationFailure({
+        params,
+        message: error instanceof Error ? error.message : 'Unable to start the Monte Carlo simulation.',
+      });
+      setRunningParams(null);
+      workerRef.current = null;
+    }
   }
 
   return (
@@ -48,6 +107,12 @@ export default function Dashboard() {
               <KPICard title="Hoskold Value" value={millions(results.hoskoldValue)} unit="$M" subtitle="Before initial capital" icon={Coins} variant="cyan" />
               <KPICard title="All-in Sustaining Cost" value={Number.isFinite(results.aiscPerUnit) ? decimal(results.aiscPerUnit) : 'N/A'} unit={Number.isFinite(results.aiscPerUnit) ? '$/t' : undefined} subtitle="Per tonne of final metal" icon={Pickaxe} variant="amber" />
             </section>
+
+            <div className="analytics-grid">
+              <CashFlowChart annualLedger={results.annualLedger} />
+              <MonteCarloChart result={monteCarloResult} isRunning={isSimulating} error={simulationError} onRun={runMonteCarlo} />
+              <SensitivityChart params={params} baselineNPV={results.npv} />
+            </div>
 
             <section className="formula-banner" aria-labelledby="formula-title"><div className="formula-icon"><BookOpen size={21} /></div><div><p className="eyebrow">GATE FORMULA REFERENCE</p><h2 id="formula-title">Hoskold’s two-rate valuation</h2><p className="formula">V = A / [r₁ + r₂ / ((1 + r₂)ⁿ − 1)]</p><p>A = average annual operating free cash flow · n = mine life · rates expressed as decimals.</p><p className="formula-note">At r₂ = 0, the sinking fund factor is 1/n.</p></div><div className="formula-rates"><span>r₁ <strong>{params.speculativeRate}%</strong></span><span>r₂ <strong>{params.sinkingFundRate}%</strong></span></div></section>
 
